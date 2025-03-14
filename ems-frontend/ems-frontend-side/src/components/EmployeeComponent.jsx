@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { createEmployee } from '../services/EmployeeService';
+import React, { useEffect, useState } from 'react'
+import { createEmployee, getEmployee, updateEmployee } from '../services/EmployeeService';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const EmployeeComponent = () => {
@@ -20,6 +20,19 @@ const EmployeeComponent = () => {
     })
 
     const navigator = useNavigate();
+
+    useEffect(() => {
+        if (id) {
+            getEmployee(id).then((response) => {
+                setFirstN(response.data.firstN);
+                setLastN(response.data.lastN);
+                setEmail(response.data.email);
+            }).catch(error => {
+                console.log(error);
+            })
+        }
+    }, [id])
+
 
     // bu kadar kod kalabalıklığının yerine bu şekilde de yazabiliriz
     // hatta   
@@ -42,18 +55,34 @@ const EmployeeComponent = () => {
     */
 
 
-    function saveEmployee(e) {
+    function saveOrUpdateEmployee(e) {
         e.preventDefault();
 
         // validForm dan gelen valid true veya false olma durumuna göre kayıt işlemi
         if (validateForm()) {
+
             const employee = { firstN, lastN, email };
             console.log(employee);
 
-            createEmployee(employee).then((result) => {
-                console.log(result.data);
-                navigator('/employees');
-            })
+            if (id) {
+                updateEmployee(id, employee).then((response) => {
+                    console.log(response.data)
+                    navigator('/employees');
+                }).catch(error => {
+                    console.log(error);
+                })
+            } else {
+                // update değil ise add employe mantığını kullanıcak
+                createEmployee(employee).then((result) => {
+                    console.log(result.data);
+                    navigator('/employees');
+                }).catch(error => {
+                    console.log(error);
+                })
+            }
+
+
+
         }
 
 
@@ -150,7 +179,7 @@ const EmployeeComponent = () => {
                                 </input>
                                 {errors.email && <div className='invalid-feedback'>{errors.email}</div>}
                             </div>
-                            <button className='btn btn-outline-success' onClick={saveEmployee}>Submit</button>
+                            <button className='btn btn-outline-success' onClick={saveOrUpdateEmployee}>Submit</button>
                         </form>
                     </div>
                 </div>

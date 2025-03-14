@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { listEmployees } from "../services/EmployeeService";
+import { deleteEmployee, listEmployees } from "../services/EmployeeService";
 import { useNavigate } from "react-router-dom"; // addEmployee için ekledik
 
 const ListEmployeeComponent = () => {
@@ -10,12 +10,16 @@ const ListEmployeeComponent = () => {
   const navigator = useNavigate();
 
   useEffect(() => {
+    getAllEmployees();
+  }, [])
+
+  function getAllEmployees() {
     listEmployees().then((response) => {
       setEmployees(response.data);
     }).catch(error => {
       console.error(error);
     })
-  }, [])
+  }
   //----------------------- End 
 
   // Add Employee butonu için onClick metodu
@@ -49,6 +53,16 @@ const ListEmployeeComponent = () => {
     },
   ];*/
 
+  // Delete employee butonu için onClick handler
+  function removeEmployee(id) {
+    console.log(id);
+
+    deleteEmployee(id).then((response) => {
+      getAllEmployees();
+    }).catch(error => {
+      console.error(error);
+    });
+  }
 
   return <div className="container">
     <h2 className="text-center">List Of Employees</h2>
@@ -82,13 +96,16 @@ const ListEmployeeComponent = () => {
               </td>
               <td>
                 <button className="btn btn-info" onClick={() => updateEmployee(employee.id)}>Update</button>
+                <button className="btn btn-danger" onClick={() => removeEmployee(employee.id)}
+                  style={{ marginLeft: '10px' }}
+                >Delete</button>
               </td>
             </tr>
           )
         }
       </tbody>
     </table>
-  </div>;
+  </div>
 };
 
 export default ListEmployeeComponent;
